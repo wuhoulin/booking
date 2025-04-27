@@ -41,12 +41,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private StringRedisTemplate redisTemplate;
     @Autowired
     private TokenManager tokenManager;
-
-
     @Override
     public void loginByCAS(HttpServletRequest request, HttpServletResponse response) throws Exception {
         String uid = request.getRemoteUser();
         Principal principal = request.getUserPrincipal();
+        logger.info("LoginByCAS 开始，remoteUser = {}, principal = {}", request.getRemoteUser(), request.getUserPrincipal());
 
         // 1. 判断 CAS 是否已认证
         if (!(principal instanceof AttributePrincipal)) {
@@ -54,6 +53,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             response.sendRedirect("http://210.34.24.34:40080/#/errLogin?notice=10002");
             return;
         }
+        logger.info("LoginByCAS 开始，remoteUser = {}, principal = {}", request.getRemoteUser(), request.getUserPrincipal());
 
         // 2. 从 CAS 拿属性
         AttributePrincipal aPrincipal = (AttributePrincipal) principal;
@@ -79,18 +79,16 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             user.setCn(cn);
 
         }
-
         // 5. 生成系统 Token 并重定向到前端
         Map<String, Object> tokenMap = getModelAndInitToken(user);
         String tokenName = (String) tokenMap.get("token");
 
         // 最后重定向到前端，并带上 token
         if (!response.isCommitted()) {
-            response.sendRedirect("http://210.34.24.34:40080/#/LoginByToken?token=" + tokenName);
+            response.sendRedirect("http://localhost:5173/#/?token=" + tokenName);
+
         }
     }
-
-
     private Map<String, Object> getModelAndInitToken(User user) {
         // 生成你系统自己的 token，比如 JWT
         String token = JwtUtil.createToken(user.getId(), user.getAccount());
@@ -119,10 +117,4 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
         return getModelAndInitToken(user);
     }
-
-
-
-
-
-
 }

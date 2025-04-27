@@ -71,9 +71,9 @@
                 :key="tp.id"
                 class="time-slot"
                 :class="{
-        active: selectedTimePoints.some(s => s.id === tp.id),
-        disabled: !tp.available
-      }"
+                active: selectedTimePoints.some(s => s.id === tp.id),
+                disabled: !tp.available
+              }"
                 @click="tp.available && selectTimePoint(tp)"
             >
               {{ formatTimePoint(tp.point) }}
@@ -93,9 +93,14 @@
         />
 
         <!-- 预约按钮 -->
-        <button class="book-button" :disabled="!canBook" @click="showTermsModal">
-          立即预约
-        </button>
+        <div class="booking-actions">
+          <button class="book-button" :disabled="!canBook" @click="showTermsModal">
+            立即预约
+          </button>
+          <button v-if="isReservationOwner" class="cancel-button" @click="showCancelModal">
+            取消预约
+          </button>
+        </div>
       </div>
     </div>
 
@@ -104,6 +109,25 @@
         v-model:show="termsModalVisible"
         @agree="proceedWithBooking"
     />
+
+    <!-- 取消预约确认弹窗 -->
+    <el-dialog
+        v-model="cancelModalVisible"
+        title="取消预约"
+        width="90%"
+        :close-on-click-modal="false"
+    >
+      <div class="cancel-dialog-content">
+        <p>确定要取消该预约吗？</p>
+        <p class="warning-text">注意：一个月内取消预约超过2次将被禁止预约3个月</p>
+      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <button class="cancel-dialog-button cancel" @click="cancelModalVisible = false">取消</button>
+          <button class="cancel-dialog-button confirm" @click="confirmCancel">确定</button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -114,7 +138,7 @@ import { getRoomDetail } from "@/api/home.js";
 import {getAllTimePoints, getAvailableTimePointsForRoom} from "@/api/timePoint.js";
 import RulesModal from "@/components/RulesModal.vue";
 import BookingForm from "@/components/booking-form.vue";
-import { createReservation } from '@/api/roomDetail.js';
+import { createReservation, cancelReservation } from '@/api/roomDetail.js';
 import { getRoomReservationStatus } from '@/api/roomDetail.js';
 import { ElMessage } from 'element-plus'
 // 添加已预约时间段状态
@@ -132,6 +156,10 @@ const availableTimePoints = ref([]);
 const timePointsLoading = ref(false);
 const termsModalVisible = ref(false);
 const isFormValid = ref(false);
+const cancelModalVisible = ref(false);
+const isReservationOwner = computed(() => {
+  return room.value.status === false && room.value.userId === currentUser.value?.id;
+});
 
 // 预约表单数据
 const bookingForm = reactive({
@@ -372,7 +400,7 @@ const proceedWithBooking = async () => {
     const response = await createReservation(reservationData);
     console.log("response",response)
     // 处理响应
-    if (response.code === 0) {
+    if (response.code === 200) {
       ElMessage.success('预约已提交，请耐心等待审核');
       resetForm();
       router.push('/');
@@ -405,6 +433,28 @@ const resetForm = () => {
 const goBack = () => {
   router.back();
 };
+
+// 显示取消预约弹窗
+const showCancelModal = () => {
+  cancelModalVisible.value = true;
+};
+
+// 确认取消预约
+const confirmCancel = async () => {
+  try {
+    await cancelReservation(room.value.reservationNo, currentUser.value.id);
+    ElMessage.success('预约已取消');
+    cancelModalVisible.value = false;
+    await loadRoomDetail(); // 重新加载教室信息
+  } catch (error) {
+    console.error('取消预约失败:', error);
+    ElMessage.error(`取消预约失败: ${error.message}`);
+  }
+};
+
+const goToStudentReservations = () => {
+  router.push('/student-reservations')
+}
 </script>
 
 <style scoped>
@@ -731,4 +781,83 @@ const goBack = () => {
   padding: 0 4px;
   border-radius: 4px;
 }
+
+.booking-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.cancel-button {
+  width: 100%;
+  padding: 14px 0;
+  background-color: #ff4d4f;
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 12px rgba(255, 77, 79, 0.2);
+}
+
+.cancel-button:hover {
+  background-color: #ff7875;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 77, 79, 0.3);
+}
+
+.cancel-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transform: none;
+}
+
+.cancel-dialog-content {
+  padding: 20px;
+  text-align: center;
+}
+
+.warning-text {
+  color: #ff4d4f;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  padding: 20px;
+}
+
+.cancel-dialog-button {
+  padding: 10px 30px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.cancel-dialog-button.cancel {
+  background-color: #f5f5f5;
+  color: #666;
+  border: 1px solid #d9d9d9;
+}
+
+.cancel-dialog-button.confirm {
+  background-color: #ff4d4f;
+  color: white;
+  border: none;
+}
+
+.cancel-dialog-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+
 </style>

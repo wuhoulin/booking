@@ -25,4 +25,21 @@ public class ReservationApprovalServiceImpl extends ServiceImpl<ReservationAppro
         queryWrapper.eq(ReservationApproval::getAdminId, adminId);
         return this.list(queryWrapper);
     }
+
+    /**
+     * 获取审核状态描述
+     * @param status 状态码
+     * @return 状态描述
+     */
+    @Override
+    public String getStatusDescription(Integer status) {
+        if (status == null) {
+            return "未知状态";
+        }
+        switch(status) {
+            case 1: return "已通过";
+            case 2: return "已拒绝";
+            default: return "未知状态(" + status + ")";
+        }
+    }
 }

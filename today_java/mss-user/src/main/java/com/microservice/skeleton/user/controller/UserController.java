@@ -20,6 +20,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.util.Map;
 
 
 @RestController
@@ -50,5 +51,16 @@ public class UserController {
         return CommonRes.create(userService.loginByToken(userLoginVo));
     }
 
+    @RestController
+    @RequestMapping("/cas")
+    public class CasProbeController {
+        @GetMapping("/whoami")
+        public Map<String, Object> whoami(HttpServletRequest req) {
+            return Map.of(
+                    "remoteUser", req.getRemoteUser(),
+                    "principal", req.getUserPrincipal()
+            );
+        }
+    }
 
 }

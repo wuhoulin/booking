@@ -29,3 +29,18 @@ export function getRoomReservationStatus(roomId, date = null) {
         }
     })
 }
+
+/**
+ * 取消预约
+ * @param {string} reservationNo - 预约编号
+ * @param {string} userId - 用户ID
+ * @returns {Promise}
+ */
+export function cancelReservation(reservationNo, userId) {
+    return request({
+        url: `/api/reservations/${reservationNo}/cancel`,
+        method: 'patch',
+        params: { userId }
+    });
+}
+

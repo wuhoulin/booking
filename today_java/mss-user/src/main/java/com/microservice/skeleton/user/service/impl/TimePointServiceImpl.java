@@ -179,4 +179,16 @@ public class TimePointServiceImpl extends ServiceImpl<TimePointMapper, TimePoint
                 })
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public TimePointVO getTimeSlotById(Integer timeId) {
+        TimePoint timePoint = this.getById(timeId);
+        if (timePoint == null) {
+            throw new BusinessException("时间点不存在");
+        }
+
+        TimePointVO vo = new TimePointVO();
+        BeanUtils.copyProperties(timePoint, vo);
+        return vo;
+    }
 }

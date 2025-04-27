@@ -24,4 +24,6 @@ public interface TimePointService extends IService<TimePoint> {
     List<TimePointResponse> getAvailableTimePoints();
 
     List<TimePointVO> getAvailableTimePointsForRoom(Integer roomId, LocalDate date);
+
+    TimePointVO getTimeSlotById(Integer timeId);
 }

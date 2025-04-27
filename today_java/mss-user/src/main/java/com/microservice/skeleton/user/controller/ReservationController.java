@@ -5,16 +5,16 @@ import com.microservice.skeleton.user.domain.Request.ReservationRequest;
 import com.microservice.skeleton.user.domain.Response.ApiResponse;
 import com.microservice.skeleton.user.domain.Response.ReservationResponse;
 import com.microservice.skeleton.user.domain.Response.RoomReservationStatusResponse;
+import com.microservice.skeleton.user.domain.vo.ReservationVO;
 import com.microservice.skeleton.user.service.ReservationService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
-
 import javax.validation.Valid;
 import java.time.LocalDate;
-
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/reservations")
@@ -44,5 +44,34 @@ public class ReservationController {
 
         RoomReservationStatusResponse response = reservationService.getRoomReservationStatus(roomId, date);
         return ApiResponse.success(response);
+    }
+
+    @PatchMapping("/{reservationNo}/cancel")
+    @ApiOperation("取消预约")
+    public ApiResponse<Void> cancelReservation(
+            @PathVariable String reservationNo,
+            @RequestParam String userId) {
+        reservationService.cancelReservation(reservationNo, userId);
+        return ApiResponse.success();
+    }
+
+
+    @GetMapping("/user/{userId}")
+    @ApiOperation("根据用户ID查询预约记录")
+    public ApiResponse<List<ReservationVO>> getReservationsByUserId(
+            @PathVariable String userId,
+            @RequestParam(required = false) Integer status) {
+
+        List<ReservationVO> reservations = reservationService.getReservationsByUserId(userId, status);
+        return ApiResponse.success(reservations);
+    }
+
+    @GetMapping("/latest")
+    @ApiOperation("查询最新的3条预约记录")
+    public ApiResponse<List<ReservationVO>> getLatestReservations(
+            @RequestParam(required = false) String userId) {
+
+        List<ReservationVO> latestReservations = reservationService.getLatestReservations(userId);
+        return ApiResponse.success(latestReservations);
     }
 }

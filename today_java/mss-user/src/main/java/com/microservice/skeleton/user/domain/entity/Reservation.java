@@ -49,11 +49,11 @@ public class Reservation {
     @TableField("need_projection")
     private Boolean needProjection;
 
-    @ApiModelProperty("申请人姓名") // ✅ 修改描述
+    @ApiModelProperty("申请人姓名")
     @TableField("user_name")
     private String userName;
 
-    @ApiModelProperty("单点登录 CN") // ✅ 新增字段
+    @ApiModelProperty("单点登录 CN")
     @TableField("user_cn")
     private String userCn;
 
@@ -76,6 +76,10 @@ public class Reservation {
     @ApiModelProperty("指导老师联系方式（如有）")
     @TableField("teacher_contact")
     private String teacherContact;
+
+    @ApiModelProperty("单点登录 用户唯一id")
+    @TableField("student_id")
+    private String studentId;
 
     @ApiModelProperty("其他需求（如有）")
     @TableField("other_requirements")

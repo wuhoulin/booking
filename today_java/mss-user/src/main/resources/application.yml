@@ -1,6 +1,5 @@
 server:
-  port: 8090
-
+  port: 9072
 spring:
   application:
     name: users
@@ -40,7 +39,10 @@ spring:
 swagger:
   enable: true
 
-
-
+# application.yml
+logging:
+  level:
+    org.apereo.cas.client: DEBUG      # Apereo CAS-Client 主包
+    org.springframework.security.cas: DEBUG   # Spring Security CAS integration
 
 

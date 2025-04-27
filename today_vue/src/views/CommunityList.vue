@@ -4,7 +4,7 @@
     <!-- 顶部导航栏 -->
     <div class="header">
       <div class="back-button">
-        <i class="icon-back">&lt;</i>
+        <i class="icon-back"></i>
       </div>
       <div class="title">一站式学生社区预约</div>
       <div class="placeholder"></div>
@@ -63,9 +63,10 @@
       </div>
     </div>
 
-    <RecentReservations>
+    <!-- 查询预约卡片部分 -->
+    <appointment-query-card>
 
-    </RecentReservations>
+    </appointment-query-card>
 
     <!-- 加载状态 -->
     <div v-if="loading" class="loading-container">
@@ -80,6 +81,7 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import {getAllCommunities, getAllCommunitiesWithRooms, getCommunityWithRooms} from "@/api/community.js";
 import RecentReservations from "@/components/RecentReservations.vue";
+import AppointmentQueryCard from "@/components/AppointmentQueryCard.vue";
 
 
 const router = useRouter();
@@ -437,4 +439,6 @@ onMounted(() => {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+
 </style>

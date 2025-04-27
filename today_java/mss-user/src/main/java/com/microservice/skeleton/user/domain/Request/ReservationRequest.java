@@ -1,5 +1,6 @@
 package com.microservice.skeleton.user.domain.Request;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -12,6 +13,9 @@ import java.util.List;
 @ApiModel(description = "预约信息请求对象")
 public class ReservationRequest {
 
+    @ApiModelProperty("单点登录 用户唯一id")
+    @TableField("student_id")
+    private String studentId;
 
     @ApiModelProperty(value = "预约教室ID", required = true, example = "1")
     @NotNull(message = "教室ID不能为空")

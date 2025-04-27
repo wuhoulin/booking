@@ -4,8 +4,9 @@ import { getCurrentInstance } from 'vue';
 
 // 创建一个axios实例
 const request = axios.create({
-    baseURL: 'http://localhost:8090',
+    baseURL: 'http://localhost:9072',
     timeout: 5000,
+    withCredentials: true,
 });
 
 // 请求拦截器

@@ -10,7 +10,10 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @Mapper
 public interface ReservationMapper extends BaseMapper<Reservation> {
@@ -20,27 +23,22 @@ public interface ReservationMapper extends BaseMapper<Reservation> {
             "AND status IN (0, 1, 4)")
     List<Reservation> findByRoomIdAndDate(@Param("roomId") Integer roomId, @Param("date") LocalDate date);
 
-//    @Select("SELECT * FROM reservations WHERE reservation_no = #{reservationNo}")
-//    Reservation findByReservationNo(@Param("reservationNo") String reservationNo);
-//
-//    @Select("SELECT COUNT(*) FROM reservations WHERE room_id = #{roomId} AND reservation_date = #{date} AND time_slot_id = #{TimePointId} AND status IN (0, 1, 4)")
-//    Integer countConflictReservation(@Param("roomId") Integer roomId, @Param("date") LocalDate date, @Param("TimePointId") Integer TimePointId);
-//
-//    @Select("SELECT r.*, u.username as user_name, u.real_name, rm.name as room_name, c.name as community_name, " +
-//           "ts.start_time, ts.end_time FROM reservations r " +
-//           "LEFT JOIN users u ON r.user_id = u.id " +
-//           "LEFT JOIN rooms rm ON r.room_id = rm.id " +
-//           "LEFT JOIN communities c ON rm.community_id = c.id " +
-//           "LEFT JOIN time_slots ts ON r.time_slot_id = ts.id " +
-//           "WHERE r.id = #{id}")
-//    ReservationVO getReservationDetail(@Param("id") Integer id);
-//
-//    @Select("SELECT r.*, u.username as user_name, u.real_name, rm.name as room_name, c.name as community_name, " +
-//           "ts.start_time, ts.end_time FROM reservations r " +
-//           "LEFT JOIN users u ON r.user_id = u.id " +
-//           "LEFT JOIN rooms rm ON r.room_id = rm.id " +
-//           "LEFT JOIN communities c ON rm.community_id = c.id " +
-//           "LEFT JOIN time_slots ts ON r.time_slot_id = ts.id " +
-//           "WHERE r.user_id = #{userId}")
-//    IPage<ReservationVO> getReservationsByUserPage(Page<ReservationVO> page, @Param("userId") Integer userId);
+    @Select("SELECT * FROM reservations WHERE user_id = #{userId} " +
+            "AND (#{status} IS NULL OR status = #{status}) " +
+            "ORDER BY reservation_date DESC, created_at DESC")
+    List<Reservation> findByUserId(@Param("userId") String userId,
+                                   @Param("status") Integer status);
+
+    // 如果使用MyBatis-Plus
+    @Select("SELECT * FROM reservations WHERE reservation_no = #{reservationNo}")
+    Optional<Reservation> selectByReservationNo(@Param("reservationNo") String reservationNo);
+
+
+    // 统计用户 N 次取消（status=3）中，取消时间在指定时刻之后的数量
+    int countByUserIdAndStatusAndCancelTimeAfter(
+            @Param("userId") String userId,
+            @Param("status") Integer status,
+            @Param("time") LocalDateTime time
+    );
+
 }
